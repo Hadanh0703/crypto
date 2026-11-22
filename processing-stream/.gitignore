@@ -1,0 +1,14 @@
+.DS_Store
+.env
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+spark-warehouse/
+checkpoints/
+
+k8s/
+.gitnexus
+.claude
+AGENTS.md
+CLAUDE.md
