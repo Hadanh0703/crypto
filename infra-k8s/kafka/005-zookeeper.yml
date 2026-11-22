@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: zookeeper
+  namespace: kafka
+spec:
+  serviceName: zk
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zookeeper
+  template:
+    metadata:
+      labels:
+        app: zookeeper
+    spec:
+      tolerations:
+        - key: "db"
+          operator: "Equal"
+          value: "true"
+          effect: "NoSchedule"
+      containers:
+        - name: zookeeper
+          image: confluentinc/cp-zookeeper:7.6.1
+          ports:
+            - containerPort: 2181
+              name: client
+          env:
+            - name: ZOOKEEPER_CLIENT_PORT
+              value: "2181"
+            - name: ZOOKEEPER_TICK_TIME
+              value: "2000"
+          volumeMounts:
+            - name: zk-data
+              mountPath: /var/lib/zookeeper/data
+            - name: zk-txn-logs
+              mountPath: /var/lib/zookeeper/log
+          resources:
+            limits:
+              cpu: 400m
+              memory: 700M
+            requests:
+              cpu: 300m
+              memory: 500M
+      securityContext:
+        fsGroup: 1000
+  volumeClaimTemplates:
+    - metadata:
+        name: zk-data
+      spec:
+        storageClassName: standard-rwo
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+    - metadata:
+        name: zk-txn-logs
+      spec:
+        storageClassName: standard-rwo
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 10Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: zk
+  namespace: kafka
+spec:
+  clusterIP: None
+  ports:
+    - name: client
+      port: 2181
+  selector:
+    app: zookeeper

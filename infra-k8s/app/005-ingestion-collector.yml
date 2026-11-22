@@ -1,0 +1,41 @@
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ingestion-collector
+  namespace: app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ingestion-collector
+  template:
+    metadata:
+      labels:
+        app: ingestion-collector
+    spec:
+      containers:
+        - name: ingestion-collector
+          image: lucaswux/ingestion-collector:dev-20260617-191740
+          command: ["yarn", "dev:worker"]
+          ports:
+            - containerPort: 5002
+          envFrom:
+            - configMapRef:
+                name: ingestion-collector-env
+          resources:
+            requests:
+              cpu: 150m
+              memory: 300M
+          livenessProbe:
+            httpGet:
+              path: /api/health-check
+              port: 5002
+            initialDelaySeconds: 30
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /api/health-check
+              port: 5002
+            initialDelaySeconds: 20
+            periodSeconds: 15
