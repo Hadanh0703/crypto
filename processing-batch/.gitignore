@@ -1,0 +1,7 @@
+docker-compose.yml
+hadoop/
+C:/hadoop/
+.venv/
+__pycache__/
+*.pyc
+shared_jars/
